@@ -1,0 +1,20 @@
+Q5. Which item was the most popular for each customer?
+WITH CTE AS
+(SELECT s.*, men.product_name, men.price, mem.join_date
+ FROM sales AS s
+ FULL OUTER JOIN menu AS men
+ ON s.product_id = men.product_id
+ FULL OUTER JOIN members AS mem
+ ON s.customer_id = mem.customer_id
+ORDER BY customer_id, order_date)
+
+
+SELECT customer_id, product_name, no_purchase
+FROM
+(
+SELECT customer_id, product_name, COUNT(product_name) AS no_purchase,
+dense_rank() OVER( PARTITION BY customer_id ORDER BY COUNT(product_name) DESC) AS rank
+FROM CTE
+GROUP BY customer_id, product_name
+) ppt
+WHERE rank = 1;
