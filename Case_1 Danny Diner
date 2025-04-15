@@ -89,3 +89,34 @@ ORDER BY 1
 ;
 
 Q10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+
+SELECT customer_id,
+SUM(CASE
+	WHEN product_id = 1 THEN 2*10*price
+    WHEN product_id IN (2,3) AND order_date BETWEEN join_date AND join_date + INTERVAL '7 days' THEN 2*10*price
+    ELSE 10* price
+END)
+FROM CTE
+WHERE customer_id IN ('A', 'B')
+GROUP BY 1
+;
+
+SELECT customer_id,
+       SUM(
+           CASE 
+               WHEN (
+                   (order_date - join_date BETWEEN 0 AND 6)
+                   OR (product_name = 'sushi')
+               ) THEN 20 * price
+               ELSE 10 * price
+           END
+       ) AS total_points
+FROM cte
+WHERE order_date < '2021-02-01'
+  AND customer_id != 'C'
+GROUP BY customer_id
+ORDER BY customer_id;
+
+Note
+Q8 no need multiply uan with price, just sum of price, same to Q1
+Q9 on the sequencce on coding
