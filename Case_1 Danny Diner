@@ -42,3 +42,21 @@ WHERE order_date < join_date
  ) temp
 WHERE order_sequence = 1
 ;
+
+Q8. What is the total items and amount spent for each member before they became a member?
+SELECT customer_id, SUM(total_items), SUM(total_spend)
+FROM
+(
+SELECT customer_id, product_name, COUNT(*) AS total_items, COUNT(product_id) * price AS total_spend
+FROM CTE
+WHERE order_date < join_date 
+GROUP BY customer_id, product_name, price
+ORDER BY customer_id
+  ) temp
+GROUP BY customer_id;
+
+Updated Ver:
+SELECT customer_id, COUNT(product_id), SUM(price)
+FROM CTE
+WHERE order_date < join_date
+GROUP BY customer_id;
