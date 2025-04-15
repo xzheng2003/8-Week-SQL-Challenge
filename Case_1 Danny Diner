@@ -18,3 +18,25 @@ FROM CTE
 GROUP BY customer_id, product_name
 ) ppt
 WHERE rank = 1;```
+
+Q6. Which item was purchased first by the customer after they became a member?
+WITH CTE AS
+(SELECT s.*, men.product_name, men.price, mem.join_date
+ FROM sales AS s
+ FULL OUTER JOIN menu AS men
+ ON s.product_id = men.product_id
+ FULL OUTER JOIN members AS mem
+ ON s.customer_id = mem.customer_id
+ORDER BY customer_id, order_date)
+
+SELECT customer_id, product_name
+FROM
+(
+SELECT customer_id, product_name, 
+dense_rank() OVER(PARTITION BY customer_id ORDER BY order_date) AS order_sequence
+FROM CTE
+WHERE order_date > join_date 
+ ) temp
+WHERE order_sequence = 1
+;
+ 
