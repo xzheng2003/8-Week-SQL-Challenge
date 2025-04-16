@@ -117,6 +117,22 @@ WHERE order_date < '2021-02-01'
 GROUP BY customer_id
 ORDER BY customer_id;
 
+Additional Q
+SELECT customer_id, order_date, product_name, price, member,
+CASE
+	WHEN member = 'Y' THEN dense_rank() OVER(PARTITION BY customer_id, member ORDER BY order_date)
+    ELSE NULL
+END
+FROM
+(
+SELECT customer_id, order_date,  product_name, price,
+CASE
+	WHEN order_date >= join_date THEN 'Y'
+    ELSE 'N'
+END AS member
+FROM CTE 
+  ) temp;
+
 Note
 Q8 no need multiply uan with price, just sum of price, same to Q1
 Q9 on the sequencce on coding
