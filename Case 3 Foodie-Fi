@@ -18,6 +18,44 @@ How many customers have upgraded to an annual plan in 2020?
 How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
 Can you further breakdown this average value into 30 day periods (i.e. 0-30 days, 31-60 days etc)
 How many customers downgraded from a pro monthly to a basic monthly plan in 2020?
+
+
+JOIN:
+WITH CTE AS
+(
+SELECT s.*, plan_name, price
+FROM foodie_fi.plans AS p
+JOIN foodie_fi.subscriptions AS s
+ON p.plan_id = s.plan_id
+ORDER BY customer_id, start_date)
+
+Q1. How many customers has Foodie-Fi ever had?
+SELECT COUNT(DISTINCT customer_id)
+FROM CTE
+WHERE plan_id != '0';
+
+Q2. What is the monthly distribution of trial plan start_date values for our dataset - use the start of the month as the group by value
+SELECT EXTRACT(MONTH FROM start_date) AS month, COUNT(EXTRACT(MONTH FROM start_date))
+FROM CTE
+WHERE plan_id = '0' 
+GROUP BY EXTRACT(MONTH FROM start_date)
+ORDER BY month;
+
+Q3. What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name
+SELECT plan_id, plan_name, COUNT(plan_name)
+FROM CTE
+WHERE start_date >= '2021-01-01'
+GROUP BY 1,2
+ORDER BY 1
+;
+
+Q4. What is the customer count and percentage of customers who have churned rounded to 1 decimal place?
+SELECT plan_id, plan_name, COUNT(*), ROUND((COUNT(*)/10.0), 1) AS percentage
+FROM CTE
+WHERE plan_id = '4'
+GROUP BY 1,2
+;
+
 C. Challenge Payment Question
 The Foodie-Fi team wants you to create a new payments table for the year 2020 that includes amounts paid by each customer in the subscriptions table with the following requirements:
 
