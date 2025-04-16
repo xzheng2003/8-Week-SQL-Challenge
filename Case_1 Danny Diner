@@ -1,12 +1,12 @@
 Join the 3 schema:
-WITH CTE AS
+```WITH CTE AS
 (SELECT s.*, men.product_name, men.price, mem.join_date
  FROM sales AS s
  FULL OUTER JOIN menu AS men
  ON s.product_id = men.product_id
  FULL OUTER JOIN members AS mem
  ON s.customer_id = mem.customer_id
-ORDER BY customer_id, order_date)
+ORDER BY customer_id, order_date)```
 
 Q5. Which item was the most popular for each customer?
 SELECT customer_id, product_name, no_purchase
