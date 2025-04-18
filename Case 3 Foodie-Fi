@@ -56,6 +56,47 @@ WHERE plan_id = '4'
 GROUP BY 1,2
 ;
 
+Q5. How many customers have churned straight after their initial free trial - what percentage is this rounded to the nearest whole number?
+SELECT COUNT(customer_id), ROUND(100.0 * COUNT(customer_id)/ (SELECT COUNT(DISTINCT customer_id) FROM CTE),0) percentage_churned
+FROM
+(
+SELECT customer_id, plan_id, LEAD(plan_id) OVER(PARTITION BY customer_id ORDER BY plan_id) AS next_plan_id
+FROM CTE
+  ) temp
+WHERE plan_id = '0' AND next_plan_id = '4'
+;
+
+Q6. What is the number and percentage of customer plans after their initial free trial?
+SELECT post_free_trial_plan, COUNT(post_free_trial_plan), ROUND(100.0 * COUNT(post_free_trial_plan) / (SELECT COUNT(plan_id) FROM CTE),1) AS perc
+FROM
+(
+SELECT *,
+CASE
+	WHEN plan_id = '0' THEN LEAD(plan_id) OVER(PARTITION BY customer_id ORDER BY start_date) 
+END AS post_free_trial_plan
+FROM CTE
+  ) temp
+WHERE post_free_trial_plan IS NOT NULL
+GROUP BY 1
+ORDER BY 1
+;
+
+Q7. What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
+(ONLY interested at knowing the latest plan used by customer plan, ignoring all previous plan)
+SELECT plan_id, plan_name, COUNT(*), ROUND( 100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 1) AS percantage
+FROM
+(
+SELECT *, row_number() OVER(PARTITION BY customer_id ORDER BY start_date DESC) AS row
+FROM CTE
+WHERE start_date < '2021-01-01'
+  ) temp
+WHERE row = 1
+GROUP BY 1,2
+ORDER By 1
+;
+
+Q8. How many customers have upgraded to an annual plan in 2020?
+
 C. Challenge Payment Question
 The Foodie-Fi team wants you to create a new payments table for the year 2020 that includes amounts paid by each customer in the subscriptions table with the following requirements:
 
