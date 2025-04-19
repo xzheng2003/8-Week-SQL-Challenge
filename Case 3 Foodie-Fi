@@ -96,6 +96,67 @@ ORDER By 1
 ;
 
 Q8. How many customers have upgraded to an annual plan in 2020?
+SELECT COUNT(customer_id)
+FROM
+(
+SELECT *, row_number() OVER(PARTITION BY customer_id ORDER BY start_date DESC) AS rn
+FROM CTE
+WHERE EXTRACT(YEAR FROM start_date) = '2020'
+ ) temp
+WHERE rn = 1
+AND plan_id = '3'
+;
+
+Q9. How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
+My wrong code:
+SELECT *
+FROM
+(
+SELECT customer_id, (SELECT MIN(start_date) FROM CTE) AS start_date,
+CASE
+	WHEN plan_id = '3' THEN start_date
+END annual_plan
+FROM CTE
+  ) temp
+WHERE annual_plan IS NOT NULL
+;
+
+Eg code
+SELECT AVG(next_start - start_date)
+FROM
+(
+SELECT *, LEAD(start_date, 1) OVER(PARTITION BY customer_id ORDER BY start_date) AS next_start
+FROM CTE
+WHERE plan_id IN ('0','3')
+) temp;    
+///
+SELECT AVG(annual_plan - start_date)
+FROM
+(
+SELECT customer_id, 
+MIN(CASE
+	WHEN plan_id = '0' THEN start_date
+END) AS start_date,
+MIN(CASE
+	WHEN plan_id = '3' THEN start_date
+END) AS annual_plan
+FROM CTE
+GROUP BY 1
+  ) temp
+;
+
+Q10. Can you further breakdown this average value into 30 day periods (i.e. 0-30 days, 31-60 days etc)
+
+Q11. How many customers downgraded from a pro monthly to a basic monthly plan in 2020?
+SELECT COUNT(DISTINCT customer_id)
+FROM
+(
+SELECT *, LEAD(plan_id,1) OVER(PARTITION BY customer_id ORDER BY start_date) AS next_plan_id
+FROM CTE
+  ) temp
+WHERE plan_id = '2'
+AND next_plan_id = '1'
+;
 
 C. Challenge Payment Question
 The Foodie-Fi team wants you to create a new payments table for the year 2020 that includes amounts paid by each customer in the subscriptions table with the following requirements:
