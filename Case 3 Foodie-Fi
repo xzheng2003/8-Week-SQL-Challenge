@@ -5,7 +5,7 @@ A. Customer Journey
 Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
 Try to keep it as short as possible - you may also want to run some sort of join to make your explanations a bit easier!
 
-
+*********************Check back Q10 & Challenge payment ques**********************************************************
 B. Data Analysis Questions
 How many customers has Foodie-Fi ever had?
 What is the monthly distribution of trial plan start_date values for our dataset - use the start of the month as the group by value
