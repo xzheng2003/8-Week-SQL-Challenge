@@ -10,10 +10,32 @@ WITH CTE AS (
   )
 
 A. Customer Nodes Exploration
-How many unique nodes are there on the Data Bank system?
-What is the number of nodes per region?
-How many customers are allocated to each region?
-How many days on average are customers reallocated to a different node?
+1. How many unique nodes are there on the Data Bank system?
+
+SELECT COUNT(DISTINCT node_id)
+FROM CTE
+ORDER BY 1
+;
+
+2. What is the number of nodes per region?
+
+SELECT region_name, COUNT(DISTINCT node_id)
+FROM CTE
+GROUP BY 1
+ORDER BY 1
+;
+
+3. How many customers are allocated to each region?
+
+SELECT region_name, COUNT(DISTINCT customer_id)
+FROM CTE
+GROUP BY 1
+ORDER BY 1
+;
+
+4. How many days on average are customers reallocated to a different node?
+
+
 What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
 B. Customer Transactions
 What is the unique count and total amount for each transaction type?
