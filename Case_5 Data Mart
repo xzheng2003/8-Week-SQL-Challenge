@@ -29,8 +29,8 @@ WITH CTE AS
  ELSE 'unknown'
  END AS age_band,
  CASE
- WHEN segment LIKE '_C' THEN 'Couples'
- WHEN segment LIKE '_F' THEN 'Families'
+ WHEN segment LIKE 'C_' THEN 'Couples'
+ WHEN segment LIKE 'F_' THEN 'Families'
  ELSE 'unknown'
  END AS demographic,
  transactions, sales,
@@ -106,5 +106,61 @@ ORDER BY 1
 ;
 
 7. What is the percentage of sales by demographic for each year in the dataset?
+
+SELECT calender_year,
+ROUND(100.0 * couples_sales / (families_sales + couples_sales),2) AS couples_percentage,
+ROUND(100.0 * families_sales / (families_sales + couples_sales),2) AS families_percentage
+FROM
+(
+SELECT calender_year,
+SUM(CASE
+WHEN demographic = 'Couples' THEN sales
+END) AS couples_sales,
+SUM(CASE
+WHEN demographic = 'Families' THEN sales
+END) AS families_sales
+FROM CTE
+GROUP BY 1
+ORDER BY 1
+  ) temp
+;
+
 8. Which age_band and demographic values contribute the most to Retail sales?
+
+SELECT age_band, demographic
+FROM CTE
+WHERE platform = 'Retail'
+GROUP BY 1,2
+ORDER BY sum(sales) DESC
+LIMIT 1
+;
+
 9. Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? If not - how would you calculate it instead?
+
+SELECT calender_year, platform, SUM(sales)/SUM(transactions), ROUND(AVG(avg_transactions),2)
+FROM CTE
+GROUP BY 1,2
+ORDER BY 1,2
+;
+
+3. Before & After Analysis
+This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
+
+Taking the week_date value of 2020-06-15 as the baseline week where the Data Mart sustainable packaging changes came into effect.
+
+We would include all week_date values for 2020-06-15 as the start of the period after the change and the previous week_date values would be before
+
+Using this analysis approach - answer the following questions:
+
+What is the total sales for the 4 weeks before and after 2020-06-15? What is the growth or reduction rate in actual values and percentage of sales?
+What about the entire 12 weeks before and after?
+How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?
+4. Bonus Question
+Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
+
+region
+platform
+age_band
+demographic
+customer_type
+Do you have any further recommendations for Danny’s team at Data Mart or any interesting insights based off this analysis?
