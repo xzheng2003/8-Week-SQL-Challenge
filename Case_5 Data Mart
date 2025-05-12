@@ -145,22 +145,177 @@ ORDER BY 1,2
 
 3. Before & After Analysis
 This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
-
 Taking the week_date value of 2020-06-15 as the baseline week where the Data Mart sustainable packaging changes came into effect.
-
 We would include all week_date values for 2020-06-15 as the start of the period after the change and the previous week_date values would be before
-
 Using this analysis approach - answer the following questions:
 
-What is the total sales for the 4 weeks before and after 2020-06-15? What is the growth or reduction rate in actual values and percentage of sales?
-What about the entire 12 weeks before and after?
-How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?
+1. What is the total sales for the 4 weeks before and after 2020-06-15? What is the growth or reduction rate in actual values and percentage of sales?
+
+,
+CTE2 AS (SELECT
+  SUM(CASE
+  	WHEN week_date BETWEEN DATE '2020-06-15' - INTERVAL '1 day' - INTERVAL '4 weeks' + INTERVAL '1 Day' AND DATE '2020-06-15' - INTERVAL '1 day' THEN SALES
+  END) AS before_sales,
+  SUM(CASE
+  	WHEN week_date BETWEEN DATE '2020-06-15' AND DATE '2020-06-15' + INTERVAL '4 weeks' - INTERVAL '1 day' THEN SALES
+  END) AS after_sales
+  FROM CTE
+  )
+
+SELECT before_sales, after_sales, after_sales - before_sales AS delta, ROUND(100.0*(after_sales - before_sales)/before_sales,2 ) AS percentage_sales
+FROM CTE2
+;
+
+2. What about the entire 12 weeks before and after?
+
+,
+CTE2 AS (SELECT
+  SUM(CASE
+  	WHEN week_date BETWEEN DATE '2020-06-15' - INTERVAL '1 day' - INTERVAL '12 weeks' + INTERVAL '1 Day' AND DATE '2020-06-15' - INTERVAL '1 day' THEN SALES
+  END) AS before_sales,
+  SUM(CASE
+  	WHEN week_date BETWEEN DATE '2020-06-15' AND DATE '2020-06-15' + INTERVAL '12 weeks' - INTERVAL '1 day' THEN SALES
+  END) AS after_sales
+  FROM CTE
+  )
+
+SELECT before_sales, after_sales, after_sales - before_sales AS delta, ROUND(100.0*(after_sales - before_sales)/before_sales,2 ) AS percentage_sales
+FROM CTE2
+;
+
+3. How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?
+
+,
+CTE2 AS (SELECT calender_year,
+  SUM(CASE
+  	WHEN week_date BETWEEN (calender_year || '-06-15'):: Date - INTERVAL '1 day' - INTERVAL '4 weeks' + INTERVAL '1 Day' AND DATE (calender_year || '-06-15') :: Date - INTERVAL '1 day' THEN SALES
+  END) AS before_sales,
+  SUM(CASE
+  	WHEN week_date BETWEEN (calender_year || '-06-15'):: Date AND (calender_year || '-06-15'):: Date + INTERVAL '4 weeks' - INTERVAL '1 day' THEN SALES
+  END) AS after_sales
+  FROM CTE
+  GROUP BY 1
+  ORDER BY 1
+  )
+
+SELECT calender_year, before_sales, after_sales, after_sales - before_sales AS delta, ROUND(100.0*(after_sales - before_sales)/before_sales,2 ) AS percentage_sales
+FROM CTE2
+;
+
+//
+
+,
+CTE2 AS (SELECT calender_year,
+  SUM(CASE
+  	WHEN week_date BETWEEN (calender_year||'-06-15') :: Date - INTERVAL '1 day' - INTERVAL '12 weeks' + INTERVAL '1 Day' AND (calender_year||'-06-15') :: Date - INTERVAL '1 day' THEN SALES
+  END) AS before_sales,
+  SUM(CASE
+  	WHEN week_date BETWEEN (calender_year||'-06-15') :: Date AND (calender_year||'-06-15'):: Date + INTERVAL '12 weeks' - INTERVAL '1 day' THEN SALES
+  END) AS after_sales
+  FROM CTE
+  GROUP BY 1
+  ORDER BY 1
+  )
+
+SELECT calender_year, before_sales, after_sales, after_sales - before_sales AS delta, ROUND(100.0*(after_sales - before_sales)/before_sales,2 ) AS percentage_sales
+FROM CTE2
+;
+
 4. Bonus Question
 Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
-
 region
+
+,
+CTE2 AS (SELECT region,
+  SUM(CASE
+  	WHEN week_date BETWEEN '2020-06-15' :: Date - INTERVAL '1 day' - INTERVAL '12 weeks' + INTERVAL '1 Day' AND '2020-06-15' :: Date - INTERVAL '1 day' THEN SALES
+  END) AS before_sales,
+  SUM(CASE
+  	WHEN week_date BETWEEN '2020-06-15' :: Date AND '2020-06-15' :: Date + INTERVAL '12 weeks' - INTERVAL '1 day' THEN SALES
+  END) AS after_sales
+  FROM CTE
+  GROUP BY 1
+  )
+
+SELECT region, before_sales, after_sales, after_sales - before_sales AS delta, ROUND(100.0*(after_sales - before_sales)/before_sales,2 ) AS percentage_sales
+FROM CTE2
+ORDER BY 5
+;
+
 platform
+
+,
+CTE2 AS (SELECT platform,
+  SUM(CASE
+  	WHEN week_date BETWEEN '2020-06-15' :: Date - INTERVAL '1 day' - INTERVAL '12 weeks' + INTERVAL '1 Day' AND '2020-06-15' :: Date - INTERVAL '1 day' THEN SALES
+  END) AS before_sales,
+  SUM(CASE
+  	WHEN week_date BETWEEN '2020-06-15' :: Date AND '2020-06-15' :: Date + INTERVAL '12 weeks' - INTERVAL '1 day' THEN SALES
+  END) AS after_sales
+  FROM CTE
+  GROUP BY 1
+  )
+
+SELECT platform, before_sales, after_sales, after_sales - before_sales AS delta, ROUND(100.0*(after_sales - before_sales)/before_sales,2 ) AS percentage_sales
+FROM CTE2
+ORDER BY 5
+;
+
 age_band
+
+,
+CTE2 AS (SELECT age_band,
+  SUM(CASE
+  	WHEN week_date BETWEEN '2020-06-15' :: Date - INTERVAL '1 day' - INTERVAL '12 weeks' + INTERVAL '1 Day' AND '2020-06-15' :: Date - INTERVAL '1 day' THEN SALES
+  END) AS before_sales,
+  SUM(CASE
+  	WHEN week_date BETWEEN '2020-06-15' :: Date AND '2020-06-15' :: Date + INTERVAL '12 weeks' - INTERVAL '1 day' THEN SALES
+  END) AS after_sales
+  FROM CTE
+  GROUP BY 1
+  )
+
+SELECT age_band, before_sales, after_sales, after_sales - before_sales AS delta, ROUND(100.0*(after_sales - before_sales)/before_sales,2 ) AS percentage_sales
+FROM CTE2
+ORDER BY 5
+;
+
 demographic
+
+,
+CTE2 AS (SELECT demographic,
+  SUM(CASE
+  	WHEN week_date BETWEEN '2020-06-15' :: Date - INTERVAL '1 day' - INTERVAL '12 weeks' + INTERVAL '1 Day' AND '2020-06-15' :: Date - INTERVAL '1 day' THEN SALES
+  END) AS before_sales,
+  SUM(CASE
+  	WHEN week_date BETWEEN '2020-06-15' :: Date AND '2020-06-15' :: Date + INTERVAL '12 weeks' - INTERVAL '1 day' THEN SALES
+  END) AS after_sales
+  FROM CTE
+  GROUP BY 1
+  )
+
+SELECT demographic, before_sales, after_sales, after_sales - before_sales AS delta, ROUND(100.0*(after_sales - before_sales)/before_sales,2 ) AS percentage_sales
+FROM CTE2
+ORDER BY 5
+;
+
 customer_type
+
+,
+CTE2 AS (SELECT customer_type,
+  SUM(CASE
+  	WHEN week_date BETWEEN '2020-06-15' :: Date - INTERVAL '1 day' - INTERVAL '12 weeks' + INTERVAL '1 Day' AND '2020-06-15' :: Date - INTERVAL '1 day' THEN SALES
+  END) AS before_sales,
+  SUM(CASE
+  	WHEN week_date BETWEEN '2020-06-15' :: Date AND '2020-06-15' :: Date + INTERVAL '12 weeks' - INTERVAL '1 day' THEN SALES
+  END) AS after_sales
+  FROM CTE
+  GROUP BY 1
+  )
+
+SELECT customer_type, before_sales, after_sales, after_sales - before_sales AS delta, ROUND(100.0*(after_sales - before_sales)/before_sales,2 ) AS percentage_sales
+FROM CTE2
+ORDER BY 5
+;
+
 Do you have any further recommendations for Danny’s team at Data Mart or any interesting insights based off this analysis?
